@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String               @id @default(cuid())
+  email             String               @unique
+  username          String               @unique
+  password          String
+  avatar            String?
+  bio               String?
+  totalScore        Int                  @default(0)
+  gamesPlayed       Int                  @default(0)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  scores            Score[]
+  achievements      UserAchievement[]
+}
+
+model Game {
+  id                String               @id @default(cuid())
+  name              String               @unique
+  slug              String               @unique
+  description       String
+  difficulty        String               @default("medium")
+  category          String
+  icon              String?
+  instructions      String?
+  createdAt         DateTime             @default(now())
+  scores            Score[]
+}
+
+model Score {
+  id                String               @id @default(cuid())
+  userId            String
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId            String
+  game              Game                 @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  points            Int
+  duration          Int
+  timestamp         DateTime             @default(now())
+  createdAt         DateTime             @default(now())
+  @@index([userId])
+  @@index([gameId])
+  @@index([points])
+  @@index([timestamp])
+}
+
+model Achievement {
+  id                String               @id @default(cuid())
+  name              String               @unique
+  slug              String               @unique
+  description       String
+  icon              String?
+  criteria          String
+  reward            Int                  @default(0)
+  createdAt         DateTime             @default(now())
+  users             UserAchievement[]
+}
+
+model UserAchievement {
+  id                String               @id @default(cuid())
+  userId            String
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId     String
+  achievement       Achievement          @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt        DateTime             @default(now())
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
