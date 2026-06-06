@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -43,14 +42,6 @@ const games = [
     difficulty: 'hard',
     category: 'puzzle',
     instructions: 'Use arrow keys to move blocks. Space to rotate. Complete lines to clear them!'
-  },
-  {
-    name: 'Pacman Arena',
-    slug: 'pacman-arena',
-    description: 'Navigate a maze and collect pellets while avoiding ghosts',
-    difficulty: 'hard',
-    category: 'classic',
-    instructions: 'Use arrow keys to move. Collect all pellets and avoid ghosts!'
   }
 ];
 
@@ -117,23 +108,6 @@ async function main() {
   console.log('Starting database seed...');
 
   try {
-    // Create demo user
-    const hashedPassword = await bcryptjs.hash('Demo@1234', 10);
-    const demoUser = await prisma.user.upsert({
-      where: { email: 'demo@gamearcade.com' },
-      update: {},
-      create: {
-        email: 'demo@gamearcade.com',
-        username: 'demo_player',
-        password: hashedPassword,
-        bio: 'Welcome to Game Arcade!',
-        totalScore: 0,
-        gamesPlayed: 0
-      }
-    });
-
-    console.log('✓ Demo user created/updated');
-
     // Create games
     for (const game of games) {
       await prisma.game.upsert({
@@ -155,36 +129,6 @@ async function main() {
     }
 
     console.log('✓ Achievements created');
-
-    // Create some sample scores
-    const allGames = await prisma.game.findMany();
-    const sampleScores = [
-      { gameId: allGames[0].id, userId: demoUser.id, points: 250, duration: 45 },
-      { gameId: allGames[1].id, userId: demoUser.id, points: 500, duration: 120 },
-      { gameId: allGames[2].id, userId: demoUser.id, points: 100, duration: 30 },
-    ];
-
-    for (const score of sampleScores) {
-      await prisma.score.create({
-        data: score
-      });
-    }
-
-    console.log('✓ Sample scores created');
-
-    // Update user total score and games played
-    const userScores = await prisma.score.findMany({ where: { userId: demoUser.id } });
-    const totalScore = userScores.reduce((sum, score) => sum + score.points, 0);
-
-    await prisma.user.update({
-      where: { id: demoUser.id },
-      data: {
-        totalScore,
-        gamesPlayed: userScores.length
-      }
-    });
-
-    console.log('✓ User statistics updated');
     console.log('✅ Database seed completed successfully!');
   } catch (error) {
     console.error('Error seeding database:', error);

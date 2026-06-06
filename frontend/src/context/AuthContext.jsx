@@ -25,13 +25,25 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authService.register(email, username, password);
+      return response.data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Registration failed';
+      setError(message);
+      throw new Error(message);
+    }
+  }, []);
+
+  const verifyRegistration = useCallback(async (email, otp) => {
+    try {
+      setError(null);
+      const response = await authService.verifyRegistration(email, otp);
       const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       return userData;
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed';
+      const message = err.response?.data?.message || 'Verification failed';
       setError(message);
       throw new Error(message);
     }
@@ -75,7 +87,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, register, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, error, register, verifyRegistration, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

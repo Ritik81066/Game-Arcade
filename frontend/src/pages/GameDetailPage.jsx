@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { leaderboardService, gameService } from '../services/gameArcadeAPI';
 import { Loading } from '../components/Common';
 import { motion } from 'framer-motion';
@@ -27,6 +27,8 @@ export const GameDetailPage = () => {
 
     fetchData();
   }, [slug]);
+
+  const navigate = useNavigate();
 
   if (loading) return <Loading />;
   if (!game) return <div className="text-center py-16">Game not found</div>;
@@ -65,6 +67,7 @@ export const GameDetailPage = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(`/play/${slug}`)}
             className="btn-primary text-lg px-8 py-4 w-full"
           >
             Play {game.name}

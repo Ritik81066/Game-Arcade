@@ -4,6 +4,9 @@ export const authService = {
   register: (email, username, password) =>
     api.post('/auth/register', { email, username, password }),
 
+  verifyRegistration: (email, otp) =>
+    api.post('/auth/verify-registration', { email, otp }),
+
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
 
@@ -36,6 +39,9 @@ export const gameService = {
 export const scoreService = {
   submitScore: (gameId, points, duration) =>
     api.post('/scores', { gameId, points, duration }),
+
+  submitScoreBySlug: (gameSlug, points, duration) =>
+    api.post('/scores/by-slug', { gameSlug, points, duration }),
 
   getUserScores: (limit = 50) =>
     api.get('/scores/user', { params: { limit } }),

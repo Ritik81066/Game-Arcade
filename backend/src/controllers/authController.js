@@ -21,6 +21,24 @@ export const authController = {
     }
   },
 
+  async verifyRegistration(req, res, next) {
+    try {
+      await body('email').isEmail().run(req);
+      await body('otp').isLength({ min: 6, max: 6 }).run(req);
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { email, otp } = req.body;
+      const result = await authService.verifyRegistration(email, otp);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async login(req, res, next) {
     try {
       await body('email').isEmail().run(req);

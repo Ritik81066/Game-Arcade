@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { scoreService } from '../services/gameArcadeAPI';
+import { scoreService, gameService } from '../services/gameArcadeAPI';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { FlappyBirdGame } from '../games/FlappyBirdGame';
 import { SnakeGame } from '../games/SnakeGame';
 import { MemoryMatchGame } from '../games/MemoryMatchGame';
 import { BrickBreakerGame } from '../games/BrickBreakerGame';
+import { TetrisGame } from '../games/TetrisGame';
 import { motion } from 'framer-motion';
 
 const GamePlayer = () => {
@@ -19,12 +20,25 @@ const GamePlayer = () => {
     'snake-master': SnakeGame,
     'memory-match': MemoryMatchGame,
     'brick-breaker': BrickBreakerGame,
+    'tetris-clone': TetrisGame,
   };
+
+  useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        const response = await gameService.getGameBySlug(slug);
+        setGameData(response.data);
+      } catch (error) {
+        console.error('Error fetching game:', error);
+      }
+    };
+    fetchGame();
+  }, [slug]);
 
   const handleGameEnd = async (result) => {
     setPlaying(false);
     try {
-      await scoreService.submitScore(gameData?.id || slug, result.score, result.duration);
+      await scoreService.submitScoreBySlug(slug, result.score, result.duration);
     } catch (error) {
       console.error('Error submitting score:', error);
     }

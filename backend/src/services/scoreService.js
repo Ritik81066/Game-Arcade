@@ -36,6 +36,15 @@ export const scoreService = {
     return score;
   },
 
+  async submitScoreBySlug(userId, gameSlug, points, duration) {
+    const game = await prisma.game.findUnique({ where: { slug: gameSlug } });
+    if (!game) {
+      throw { status: 404, message: 'Game not found' };
+    }
+
+    return this.submitScore(userId, game.id, points, duration);
+  },
+
   async getUserScores(userId, limit = 50) {
     return prisma.score.findMany({
       where: { userId },
